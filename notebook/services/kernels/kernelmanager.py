@@ -10,6 +10,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from functools import partial
 import os
+import json
 
 from tornado import web
 from tornado.concurrent import Future
@@ -416,6 +417,18 @@ class MappingKernelManager(MultiKernelManager):
 
             idents, fed_msg_list = session.feed_identities(msg_list)
             msg = session.deserialize(fed_msg_list)
+
+            # ---------------------------------------------------------------------------------------------------------
+            import json
+            if msg["header"]["msg_type"] == "execute_input":
+                data = {
+                    "date": msg["header"]["date"].isoformat(),
+                    "msg_type": msg["header"]["msg_type"],
+                    "content": msg["content"]
+                }
+                with open("logs.json", "a") as h:
+                    h.write(json.dumps(data)+"\n")
+            # ---------------------------------------------------------------------------------------------------------
 
             msg_type = msg['header']['msg_type']
             if msg_type == 'status':
